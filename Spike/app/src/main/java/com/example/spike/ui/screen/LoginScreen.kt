@@ -3,18 +3,21 @@ package com.example.spike.ui.screen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.imePadding
 import com.example.spike.R
 
 @Composable
@@ -31,23 +34,23 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState())
+            .imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Đăng nhập",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
+        Spacer(modifier = Modifier.height(60.dp))
+
+        Text("Đăng nhập", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
             label = { Text("Tài khoản") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -56,10 +59,10 @@ fun LoginScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text("Mật khẩu") },
-            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -75,54 +78,56 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Hoặc đăng nhập bằng",
-            color = Color.Gray,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        Text("Hoặc đăng nhập bằng", color = Color.Gray)
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.facebook),
-                contentDescription = "Đăng nhập Facebook",
+            Box(
                 modifier = Modifier
                     .size(85.dp)
-                    .clickable { onFacebookLoginClick() }
-            )
-            Image(
-                painter = painterResource(id = R.drawable.google),
-                contentDescription = "Đăng nhập Google",
+                    .clickable { onFacebookLoginClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.facebook),
+                    contentDescription = "Facebook"
+                )
+            }
+
+            Box(
                 modifier = Modifier
                     .size(50.dp)
-                    .clickable { onGoogleLoginClick() }
-            )
+                    .clickable { onGoogleLoginClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = "Google"
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Row {
             Text("Bạn chưa có tài khoản? ", color = Color.Gray)
             Text(
-                text = "Đăng ký",
+                "Đăng ký",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable { onRegisterClick() }
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Quên mật khẩu?",
+            "Quên mật khẩu?",
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .align(Alignment.End)
-                .clickable { onForgotPasswordClick() }
+            modifier = Modifier.clickable { onForgotPasswordClick() }
         )
     }
 }

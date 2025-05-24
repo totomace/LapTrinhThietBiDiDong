@@ -38,6 +38,7 @@
             android:label="Login"
             android:theme="@style/Theme.SPIKE" />
 
+
     </application>
 
 </manifest>
