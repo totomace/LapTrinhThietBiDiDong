@@ -21,7 +21,7 @@ fun StrokedText(
     fontWeight: FontWeight = FontWeight.Normal,
     textColor: Color = Color.Gray,
     strokeColor: Color = Color.Black,
-    strokeWidth: Dp = 0.5.dp,
+    strokeWidth: Dp = 1.5.dp,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {

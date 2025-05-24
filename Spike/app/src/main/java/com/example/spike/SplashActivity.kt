@@ -4,20 +4,24 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 import com.example.spike.ui.components.StrokedText
+import kotlinx.coroutines.delay
+import androidx.compose.ui.text.font.FontWeight
 
 class SplashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,17 +39,16 @@ class SplashActivity : ComponentActivity() {
 
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
-    val fullText = "Yoursoundtrack, your story"
+    var visible by remember { mutableStateOf(false) }
     var sloganText by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        // Hiệu ứng typing từng ký tự
-        for (i in fullText.indices) {
-            sloganText = fullText.substring(0, i+1)
-            delay(20)
+    LaunchedEffect(true) {
+        visible = true
+        val slogan = "Yoursoundtrack, your story"
+        for (i in slogan.indices) {
+            sloganText = slogan.substring(0, i + 1)
+            delay(50)
         }
-
-        // Đợi 2 giây sau khi typing xong rồi chuyển màn
         delay(2000)
         onTimeout()
     }
@@ -53,25 +56,61 @@ fun SplashScreen(onTimeout: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo",
-                modifier = Modifier.size(150.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            StrokedText(
-                text = sloganText,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                textColor = Color.LightGray,
-                strokeColor = Color.Black,
-                strokeWidth = 1.5.dp,
-                modifier = Modifier.fillMaxWidth()
-            )
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(1000)) + scaleIn(initialScale = 0.8f),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(150.dp)
+                    )
+                    PulseEffect()
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(
+                visible = visible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn()
+            ) {
+                StrokedText(
+                    text = sloganText,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    textColor = Color.LightGray,
+                    strokeColor = Color.Black,
+                    strokeWidth = 3.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
+}
+
+@Composable
+fun PulseEffect() {
+    var pulse by remember { mutableStateOf(1f) }
+
+    LaunchedEffect(true) {
+        while (true) {
+            pulse = 1.2f
+            delay(400)
+            pulse = 1f
+            delay(400)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .size(180.dp)
+            .scale(pulse)
+            .background(Color.White.copy(alpha = 0.05f), shape = CircleShape)
+    )
 }
