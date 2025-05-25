@@ -13,6 +13,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @Composable
 fun RegisterScreen(
@@ -24,12 +26,17 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    // Tạo ScrollState để cuộn
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(scrollState),   // thêm verticalScroll ở đây
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center  // can chỉnh verticalArrangement về Center để dời lên giữa màn hình
+        // verticalArrangement = Arrangement.Center,  // bỏ hoặc đổi thành Top để tránh layout bị đẩy quá xa trên
+        verticalArrangement = Arrangement.Top
     ) {
         Text(
             text = "Đăng ký",
