@@ -1,20 +1,19 @@
 package com.example.spike
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 
 @Composable
 fun RegisterScreen(
@@ -26,16 +25,14 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Tạo ScrollState để cuộn
     val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .verticalScroll(scrollState),   // thêm verticalScroll ở đây
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
-        // verticalArrangement = Arrangement.Center,  // bỏ hoặc đổi thành Top để tránh layout bị đẩy quá xa trên
         verticalArrangement = Arrangement.Top
     ) {
         Text(
@@ -105,7 +102,7 @@ fun RegisterScreen(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Bạn đã có tài khoản? ", color = Color.Gray)
+            Text("Bạn đã có tài khoản? ", color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
                 text = "Đăng nhập",
                 color = MaterialTheme.colorScheme.primary,

@@ -11,9 +11,10 @@ class RegisterActivity : ComponentActivity() {
         setContent {
             RegisterScreen(
                 onRegisterClick = { username, email, password, confirmPassword ->
-                    // TODO: Xử lý đăng ký
+                    // TODO: Xử lý đăng ký ở đây
                 },
                 onLoginClick = {
+                    // Quay lại màn hình đăng nhập
                     startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
                     finish()
                 }
