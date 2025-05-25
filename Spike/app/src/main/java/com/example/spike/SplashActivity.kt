@@ -1,86 +1,116 @@
-package com.example.spike.ui.screen
+package com.example.spike
 
-import androidx.compose.foundation.clickable
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.Alignment
+import com.example.spike.ui.components.StrokedText
+import kotlinx.coroutines.delay
+import androidx.compose.ui.text.font.FontWeight
+
+class SplashActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                SplashScreen {
+                    startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
+                    finish()
+                }
+            }
+        }
+    }
+}
 
 @Composable
-fun RegisterScreen(
-    onRegisterClick: (username: String, email: String, password: String) -> Unit,
-    onLoginClick: () -> Unit
-) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun SplashScreen(onTimeout: () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    var sloganText by remember { mutableStateOf("") }
 
-    Column(
+    LaunchedEffect(true) {
+        visible = true
+        val slogan = "Yoursoundtrack, your story"
+        for (i in slogan.indices) {
+            sloganText = slogan.substring(0, i + 1)
+            delay(50)
+        }
+        delay(2000)
+        onTimeout()
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(Color.White),
+        contentAlignment = Alignment.Center
     ) {
-        Text("Đăng ký", fontSize = 30.sp)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Tên tài khoản") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Mật khẩu") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    // email không hợp lệ
-                    return@Button
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(1000)) + scaleIn(initialScale = 0.8f),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(150.dp)
+                    )
+                    PulseEffect()
                 }
-                // TODO: Kiểm tra tên tài khoản trùng lặp nếu cần
-                onRegisterClick(username, email, password)
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Đăng ký")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(
+                visible = visible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn()
+            ) {
+                StrokedText(
+                    text = sloganText,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    textColor = Color.LightGray,
+                    strokeColor = Color.Black,
+                    strokeWidth = 3.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Bạn đã có tài khoản? Đăng nhập ngay",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable { onLoginClick() }
-        )
     }
+}
+
+@Composable
+fun PulseEffect() {
+    var pulse by remember { mutableStateOf(1f) }
+
+    LaunchedEffect(true) {
+        while (true) {
+            pulse = 1.2f
+            delay(400)
+            pulse = 1f
+            delay(400)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .size(180.dp)
+            .scale(pulse)
+            .background(Color.White.copy(alpha = 0.05f), shape = CircleShape)
+    )
 }
