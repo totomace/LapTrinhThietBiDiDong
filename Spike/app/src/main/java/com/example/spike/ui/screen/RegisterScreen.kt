@@ -1,4 +1,4 @@
-package com.example.spike.ui.screen
+package com.example.spike
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun RegisterScreen(
-    onRegisterSubmit: (username: String, email: String, password: String, confirmPassword: String) -> Unit,
-    onBackToLogin: () -> Unit
+    onRegisterClick: (String, String, String, String) -> Unit,
+    onLoginClick: () -> Unit,
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -29,7 +29,7 @@ fun RegisterScreen(
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center  // can chỉnh verticalArrangement về Center để dời lên giữa màn hình
     ) {
         Text(
             text = "Đăng ký",
@@ -41,7 +41,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Tên tài khoản") },
+            label = { Text("Tài khoản") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -84,9 +84,7 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = {
-                onRegisterSubmit(username, email, password, confirmPassword)
-            },
+            onClick = { onRegisterClick(username, email, password, confirmPassword) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
@@ -94,20 +92,17 @@ fun RegisterScreen(
             Text("Đăng ký", fontSize = 18.sp)
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Bạn đã có tài khoản? ", color = Color.Gray)
+            Text("Bạn đã có tài khoản? ", color = Color.Gray)
             Text(
-                text = "Đăng nhập ngay",
+                text = "Đăng nhập",
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onBackToLogin() }
+                modifier = Modifier.clickable { onLoginClick() }
             )
         }
     }

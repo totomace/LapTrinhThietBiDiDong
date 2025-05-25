@@ -38,6 +38,13 @@
             android:label="Login"
             android:theme="@style/Theme.SPIKE" />
 
+        <!-- Đăng ký màn hình RegisterActivity -->
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:label="Register"
+            android:theme="@style/Theme.SPIKE" />
+
     </application>
 
 </manifest>
