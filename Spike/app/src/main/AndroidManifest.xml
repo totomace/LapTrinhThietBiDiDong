@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,7 +15,6 @@
         android:theme="@style/Theme.SPIKE"
         tools:targetApi="31">
 
-        <!-- SplashActivity là màn hình khởi động -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -24,21 +25,18 @@
             </intent-filter>
         </activity>
 
-        <!-- MainActivity là màn hình chính -->
         <activity
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/app_name"
             android:theme="@style/Theme.SPIKE" />
 
-        <!-- LoginActivity cần được khai báo để tránh lỗi khi chuyển màn -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:label="Login"
             android:theme="@style/Theme.SPIKE" />
 
-        <!-- Đăng ký màn hình RegisterActivity -->
         <activity
             android:name=".RegisterActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
