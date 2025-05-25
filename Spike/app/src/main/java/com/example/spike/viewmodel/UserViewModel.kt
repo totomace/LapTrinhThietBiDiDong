@@ -60,4 +60,28 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    // Thêm hàm resetPassword
+    fun resetPassword(
+        username: String,
+        newPassword: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (username.isBlank() || newPassword.isBlank()) {
+            onError("Thông tin không hợp lệ")
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = userPref.getUser(username)
+            if (user == null) {
+                onError("Người dùng không tồn tại")
+            } else {
+                val updatedUser = user.copy(password = newPassword)
+                userPref.saveUser(updatedUser) // Cập nhật mật khẩu mới
+                onSuccess()
+            }
+        }
+    }
 }

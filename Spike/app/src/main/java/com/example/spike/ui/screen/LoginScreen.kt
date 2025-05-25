@@ -3,6 +3,8 @@ package com.example.spike.ui.screen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -28,15 +30,20 @@ fun LoginScreen(
     onForgotPasswordClick: () -> Unit,
     onFacebookLoginClick: () -> Unit,
     onGoogleLoginClick: () -> Unit,
+    errorMessage: String? = null,
+    onErrorDismiss: () -> Unit = {}
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) } // trạng thái hiện/ẩn mật khẩu
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(scrollState), // Cho phép cuộn khi nội dung vượt quá màn hình hoặc bàn phím hiện
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -49,7 +56,10 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = {
+                username = it
+                onErrorDismiss() // Ẩn thông báo lỗi khi người dùng nhập lại
+            },
             label = { Text("Tài khoản") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
@@ -59,7 +69,10 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                onErrorDismiss()
+            },
             label = { Text("Mật khẩu") },
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -72,8 +85,20 @@ fun LoginScreen(
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(imageVector = image, contentDescription = description)
                 }
-            }
+            },
+            isError = errorMessage != null
         )
+
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 4.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 

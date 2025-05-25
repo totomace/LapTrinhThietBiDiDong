@@ -35,13 +35,28 @@
             android:name=".LoginActivity"
             android:exported="false"
             android:label="Login"
-            android:theme="@style/Theme.SPIKE" />
+            android:theme="@style/Theme.SPIKE"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <activity
             android:name=".RegisterActivity"
             android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false"
             android:label="Register"
+            android:theme="@style/Theme.SPIKE" />
+
+        <!-- Thêm vào đây -->
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false"
+            android:label="Forgot Password"
+            android:theme="@style/Theme.SPIKE"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
+        <activity
+            android:name=".ResetPasswordActivity"
+            android:exported="false"
+            android:label="Reset Password"
             android:theme="@style/Theme.SPIKE" />
 
     </application>

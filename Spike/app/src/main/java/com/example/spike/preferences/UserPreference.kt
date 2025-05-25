@@ -9,9 +9,16 @@ class UserPreference(context: Context) {
     private val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 
+    // Hàm lưu hoặc cập nhật user
     fun saveUser(user: User) {
         val users = getAllUsers().toMutableList()
-        users.add(user)
+        // Kiểm tra user có tồn tại chưa, nếu có thì cập nhật, không thì thêm mới
+        val index = users.indexOfFirst { it.username.equals(user.username, ignoreCase = true) }
+        if (index >= 0) {
+            users[index] = user // cập nhật user cũ
+        } else {
+            users.add(user) // thêm user mới
+        }
         val json = gson.toJson(users)
         prefs.edit().putString("users", json).apply()
     }
@@ -25,5 +32,13 @@ class UserPreference(context: Context) {
     fun getUser(username: String): User? {
         val users = getAllUsers()
         return users.find { it.username.equals(username, ignoreCase = true) }
+    }
+
+    fun updatePassword(username: String, newPassword: String) {
+        val user = getUser(username)
+        if (user != null) {
+            val updatedUser = user.copy(password = newPassword)
+            saveUser(updatedUser)  // saveUser đã xử lý cập nhật rồi
+        }
     }
 }
