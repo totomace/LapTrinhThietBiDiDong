@@ -27,6 +27,11 @@ class LoginActivity : ComponentActivity() {
                         errorMessage = "Sai tài khoản hoặc mật khẩu"
                     } else {
                         errorMessage = null
+
+                        // ✅ Lưu trạng thái đăng nhập
+                        val sharedPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                        sharedPrefs.edit().putBoolean("is_logged_in", true).apply()
+
                         Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()

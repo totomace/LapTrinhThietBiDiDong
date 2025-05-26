@@ -1,5 +1,7 @@
 package com.example.spike
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,29 +18,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.spike.ui.components.StrokedText
 import kotlinx.coroutines.delay
-import androidx.compose.ui.text.font.FontWeight
 
 class SplashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                SplashScreen {
-                    startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
-                    finish()
-                }
+                SplashScreen()
             }
         }
     }
 }
 
 @Composable
-fun SplashScreen(onTimeout: () -> Unit) {
+fun SplashScreen() {
+    val context = LocalContext.current
     var visible by remember { mutableStateOf(false) }
     var sloganText by remember { mutableStateOf("") }
 
@@ -50,7 +51,17 @@ fun SplashScreen(onTimeout: () -> Unit) {
             delay(50)
         }
         delay(2000)
-        onTimeout()
+
+        // ✅ Kiểm tra trạng thái đăng nhập
+        val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isLoggedIn = sharedPrefs.getBoolean("is_logged_in", false)
+
+        if (isLoggedIn) {
+            context.startActivity(Intent(context, MainActivity::class.java))
+        } else {
+            context.startActivity(Intent(context, LoginActivity::class.java))
+        }
+        (context as? Activity)?.finish()
     }
 
     Box(
