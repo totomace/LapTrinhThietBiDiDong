@@ -106,12 +106,6 @@ fun ComponentsList(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             ComponentButton("Column") { /* Chưa làm */ }
             ComponentButton("Row") { onNavigate("rowlayout") }
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = {}) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Tự tìm hiểu", color = Color.White)
-                    Text("Tìm ra tất cả các thành phần UI cơ bản", color = Color.White, fontSize = 12.sp)
-                }
-            }
         }
     }
 }
