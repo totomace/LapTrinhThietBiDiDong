@@ -68,4 +68,17 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:21.1.0")
     implementation ("com.google.code.gson:gson:2.10.1")
     implementation ("androidx.compose.material:material-icons-extended:1.6.1")
+
+    // Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Firebase Authentication
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.android.gms:play-services-auth:20.6.0")
 }
