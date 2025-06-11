@@ -43,6 +43,7 @@ android {
 val room_version = "2.5.1"
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -81,4 +82,14 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:20.6.0")
+
+    implementation ("androidx.compose.foundation:foundation:1.5.0")
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.compose.material3:material3:1.2.1")
+
+    implementation(libs.androidx.ui.text)
+    implementation("androidx.compose.ui:ui-text:1.6.1")
+
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.33.2-alpha")
 }

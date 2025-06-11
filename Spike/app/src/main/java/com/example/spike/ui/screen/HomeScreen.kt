@@ -8,6 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -23,58 +28,122 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.spike.R
 import kotlinx.coroutines.launch
+import androidx.navigation.NavHostController
+import com.example.spike.ui.components.BottomNavigationBar
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 data class Song(val title: String, val imageRes: Int, val audioRes: Int)
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavHostController) {
+    var searchQuery by remember { mutableStateOf("") }
+
     val songs = listOf(
         Song("Trúc Xinh", R.drawable.song1, R.raw.song1),
-        Song("Đừng làm trái tim anh đau", R.drawable.song2, R.raw.song2)
+        Song("Đừng làm trái tim anh đau", R.drawable.song2, R.raw.song2),
+        Song("Hãy trao cho anh", R.drawable.song3, R.raw.song3),
+        Song("Mất kết nối", R.drawable.song4, R.raw.song4),
     )
 
+    val scrollState = rememberScrollState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .verticalScroll(scrollState)
+                .padding(bottom = 80.dp)
+        ) {
+            // Cả 2 đều dùng cùng biến và logic
+            TopBar(
+                onSearchClick = {
+                    navController.navigate("search") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onSettingsClick = {
+                    navController.navigate("settings")
+                }
+            )
+
+            SuggestionTitle()
+            PlaylistSuggestions()
+            SongList(songs = songs)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun TopBar(
+    onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        TopBar()
-        SearchBar()
-        SuggestionTitle()
-        PlaylistSuggestions()
-        SongList(songs = songs)
-        Spacer(modifier = Modifier.weight(1f))
-        BottomNavigationBar()
-    }
-}
-
-@Composable
-fun TopBar() {
-    Row(
-        modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp)
     ) {
-        Image(
-            painter = painterResource(R.drawable.logo),
-            contentDescription = "Logo",
-            modifier = Modifier.size(40.dp)
-        )
-        Icon(
-            imageVector = Icons.Default.Notifications,
-            contentDescription = "Thông báo",
-            tint = Color(0xFF212121)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logo),
+                contentDescription = "Logo",
+                modifier = Modifier.size(40.dp)
+            )
+
+            Row {
+                IconButton(onClick = { /* thông báo */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Thông báo",
+                        tint = Color(0xFF212121)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFF5F5F5), shape = MaterialTheme.shapes.small)
+                .clickable { onSearchClick() }
+                .padding(horizontal = 12.dp, vertical = 10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color(0xFF757575)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Bạn muốn nghe gì?", color = Color(0xFF757575), fontSize = 16.sp)
+            }
+        }
     }
 }
 
 @Composable
-fun SearchBar() {
+fun SearchBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSearchClick: () -> Unit
+) {
     OutlinedTextField(
-        value = "",
-        onValueChange = {},
+        value = value,
+        onValueChange = onValueChange,
         placeholder = { Text("Bạn muốn nghe gì?", color = Color(0xFF757575)) },
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = "Search", tint = Color(0xFF757575))
@@ -86,9 +155,11 @@ fun SearchBar() {
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
+        singleLine = true,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .clickable { onSearchClick() } // Click toàn khối chuyển trang
     )
 }
 
@@ -106,14 +177,9 @@ fun SuggestionTitle() {
 @Composable
 fun PlaylistSuggestions() {
     val playlists = listOf("Top Hits", "Chill Vibes", "Workout", "Ballads", "EDM", "Remix")
-    // Danh sách màu tươi, tương ứng từng playlist
     val colors = listOf(
-        Color(0xFFFF6F61), // đỏ cam tươi
-        Color(0xFF6BCB77), // xanh lá mạ tươi
-        Color(0xFF4D96FF), // xanh dương tươi
-        Color(0xFFF9DC5C), // vàng tươi
-        Color(0xFFFF9F1C), // cam sáng
-        Color(0xFF9B5DE5)  // tím sáng
+        Color(0xFFFF6F61), Color(0xFF6BCB77), Color(0xFF4D96FF),
+        Color(0xFFF9DC5C), Color(0xFFFF9F1C), Color(0xFF9B5DE5)
     )
     val scope = rememberCoroutineScope()
 
@@ -174,89 +240,65 @@ fun SongList(songs: List<Song>) {
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // ✅ Bọc LazyRow trong Box để căn giữa
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 600.dp)
         ) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 0.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                itemsIndexed(songs) { index, song ->
-                    val isPlaying = (playingIdx == index)
-                    Box(
+            itemsIndexed(songs) { index, song ->
+                val isPlaying = (playingIdx == index)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
+                        .background(Color(0xFFF0F0F0), MaterialTheme.shapes.medium)
+                        .padding(8.dp)
+                ) {
+                    Image(
+                        painter = painterResource(song.imageRes),
+                        contentDescription = song.title,
                         modifier = Modifier
-                            .width(160.dp)
-                            .height(250.dp)
-                            .background(Color(0xFFF0F0F0), MaterialTheme.shapes.medium)
-                            .padding(8.dp)
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Image(
-                                painter = painterResource(song.imageRes),
-                                contentDescription = song.title,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f),
-                                contentScale = ContentScale.Crop
-                            )
-                            Text(
-                                text = song.title,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF212121),
-                                maxLines = 2,
-                                modifier = Modifier.padding(horizontal = 4.dp)
-                            )
-                            IconButton(onClick = {
-                                if (isPlaying) {
-                                    mediaPlayer?.pause()
-                                    playingIdx = null
-                                } else {
-                                    mediaPlayer?.release()
-                                    mediaPlayer = MediaPlayer.create(ctx, song.audioRes).apply {
-                                        setOnCompletionListener { playingIdx = null }
-                                        start()
-                                    }
-                                    playingIdx = index
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = song.title,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF212121),
+                        maxLines = 2,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = {
+                            if (isPlaying) {
+                                mediaPlayer?.pause()
+                                playingIdx = null
+                            } else {
+                                mediaPlayer?.release()
+                                mediaPlayer = MediaPlayer.create(ctx, song.audioRes).apply {
+                                    setOnCompletionListener { playingIdx = null }
+                                    start()
                                 }
-                            }) {
-                                Icon(
-                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    tint = Color(0xFF6200EE),
-                                    contentDescription = null
-                                )
+                                playingIdx = index
                             }
-                        }
+                        },
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            tint = Color(0xFF6200EE),
+                            contentDescription = null
+                        )
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun BottomNavigationBar() {
-    var sel by remember { mutableStateOf(0) }
-    NavigationBar(containerColor = Color.White) {
-        listOf(
-            Icons.Default.Home to "Trang chủ",
-            Icons.Default.Search to "Tìm kiếm",
-            Icons.Default.LibraryMusic to "Thư viện",
-            Icons.Default.Settings to "Cài đặt"
-        ).forEachIndexed { i, (icon, label) ->
-            val selColor = if (sel == i) Color(0xFF6200EE) else Color(0xFF9E9E9E)
-            NavigationBarItem(
-                icon = { Icon(icon, contentDescription = label, tint = selColor) },
-                label = { Text(label, color = selColor) },
-                selected = (sel == i),
-                onClick = { sel = i }
-            )
         }
     }
 }
