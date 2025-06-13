@@ -28,7 +28,8 @@ class LoginActivity : ComponentActivity() {
                     } else {
                         errorMessage = null
 
-                        // ✅ Lưu trạng thái đăng nhập
+                        // Lưu trạng thái đăng nhập và username
+                        userPrefs.setCurrentUser(username) // Lưu username vào current_user
                         val sharedPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
                         sharedPrefs.edit().putBoolean("is_logged_in", true).apply()
 

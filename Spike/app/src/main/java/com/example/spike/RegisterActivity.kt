@@ -42,9 +42,12 @@ class RegisterActivity : ComponentActivity() {
 
                     val newUser = User(username, email, password)
                     userPrefs.saveUser(newUser)
+                    userPrefs.setCurrentUser(username) // Lưu username vào current_user
+                    val sharedPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                    sharedPrefs.edit().putBoolean("is_logged_in", true).apply()
 
-                    Toast.makeText(this, "Đăng ký thành công. Vui lòng đăng nhập", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, LoginActivity::class.java))
+                    Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show()
+                     // Chuyển đến MainActivity
                     finish()
                 },
                 onLoginClick = {
