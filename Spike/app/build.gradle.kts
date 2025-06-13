@@ -92,4 +92,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-text:1.6.1")
 
     implementation("com.google.accompanist:accompanist-navigation-animation:0.33.2-alpha")
+
+    implementation ("androidx.core:core-splashscreen:1.0.1")
+
+    implementation ("androidx.compose.ui:ui-text-google-fonts:1.6.1")
 }
