@@ -1,5 +1,6 @@
 package com.example.spike.ui.screen
 
+import android.content.Context
 import android.media.MediaPlayer
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
@@ -29,27 +30,29 @@ import androidx.compose.ui.unit.sp
 import com.example.spike.R
 import kotlinx.coroutines.launch
 import androidx.navigation.NavHostController
-import com.example.spike.ui.components.BottomNavigationBar
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusTarget
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 data class Song(val title: String, val imageRes: Int, val audioRes: Int)
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     var searchQuery by remember { mutableStateOf("") }
-
     val songs = listOf(
         Song("Trúc Xinh", R.drawable.song1, R.raw.song1),
         Song("Đừng làm trái tim anh đau", R.drawable.song2, R.raw.song2),
         Song("Hãy trao cho anh", R.drawable.song3, R.raw.song3),
         Song("Mất kết nối", R.drawable.song4, R.raw.song4),
     )
-
     val scrollState = rememberScrollState()
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+    var playingIdx by remember { mutableStateOf<Int?>(null) }
+    val context = LocalContext.current // Store context locally
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer?.release()
+            mediaPlayer = null
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -57,9 +60,8 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .background(Color.White)
                 .verticalScroll(scrollState)
-                .padding(bottom = 80.dp)
+                .padding(bottom = 72.dp) // Space for MiniPlayer and padding
         ) {
-            // Cả 2 đều dùng cùng biến và logic
             TopBar(
                 onSearchClick = {
                     navController.navigate("search") {
@@ -72,11 +74,56 @@ fun HomeScreen(navController: NavHostController) {
                     navController.navigate("settings")
                 }
             )
-
             SuggestionTitle()
             PlaylistSuggestions()
-            SongList(songs = songs)
+            SongList(
+                songs = songs,
+                mediaPlayer = mediaPlayer,
+                playingIdx = playingIdx,
+                onMediaPlayerChange = { mediaPlayer = it },
+                onPlayingIdxChange = { playingIdx = it }
+            )
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Mini Player
+        val currentIdx = playingIdx // Store playingIdx in a local variable
+        if (currentIdx != null && currentIdx in songs.indices) {
+            MiniPlayer(
+                currentSong = songs[currentIdx],
+                isPlaying = mediaPlayer?.isPlaying == true,
+                context = context,
+                onPlayPauseClick = {
+                    if (mediaPlayer?.isPlaying == true) {
+                        mediaPlayer?.pause()
+                        playingIdx = playingIdx // Trigger recomposition
+                    } else {
+                        mediaPlayer?.start()
+                        playingIdx = playingIdx // Trigger recomposition
+                    }
+                },
+                onNextClick = {
+                    mediaPlayer?.release()
+                    val nextIdx = if (currentIdx < songs.size - 1) currentIdx + 1 else 0
+                    mediaPlayer = MediaPlayer.create(context, songs[nextIdx].audioRes).apply {
+                        setOnCompletionListener { playingIdx = null }
+                        start()
+                    }
+                    playingIdx = nextIdx
+                },
+                onPreviousClick = {
+                    mediaPlayer?.release()
+                    val prevIdx = if (currentIdx > 0) currentIdx - 1 else songs.size - 1
+                    mediaPlayer = MediaPlayer.create(context, songs[prevIdx].audioRes).apply {
+                        setOnCompletionListener { playingIdx = null }
+                        start()
+                    }
+                    playingIdx = prevIdx
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp) // Match SearchBar padding
+            )
         }
     }
 }
@@ -101,7 +148,6 @@ fun TopBar(
                 contentDescription = "Logo",
                 modifier = Modifier.size(40.dp)
             )
-
             Row {
                 IconButton(onClick = { /* thông báo */ }) {
                     Icon(
@@ -112,9 +158,7 @@ fun TopBar(
                 }
             }
         }
-
         Spacer(modifier = Modifier.height(12.dp))
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,7 +203,7 @@ fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .clickable { onSearchClick() } // Click toàn khối chuyển trang
+            .clickable { onSearchClick() }
     )
 }
 
@@ -190,8 +234,7 @@ fun PlaylistSuggestions() {
         itemsIndexed(playlists) { index, name ->
             var clicked by remember { mutableStateOf(false) }
             val bgColor by animateColorAsState(
-                if (clicked) colors[index].copy(alpha = 0.7f)
-                else colors[index]
+                if (clicked) colors[index].copy(alpha = 0.7f) else colors[index]
             )
             Box(
                 modifier = Modifier
@@ -219,17 +262,14 @@ fun PlaylistSuggestions() {
 }
 
 @Composable
-fun SongList(songs: List<Song>) {
+fun SongList(
+    songs: List<Song>,
+    mediaPlayer: MediaPlayer?,
+    playingIdx: Int?,
+    onMediaPlayerChange: (MediaPlayer?) -> Unit,
+    onPlayingIdxChange: (Int?) -> Unit
+) {
     val ctx = LocalContext.current
-    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
-    var playingIdx by remember { mutableStateOf<Int?>(null) }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            mediaPlayer?.release()
-            mediaPlayer = null
-        }
-    }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
@@ -239,7 +279,6 @@ fun SongList(songs: List<Song>) {
             color = Color(0xFF212121),
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -279,14 +318,15 @@ fun SongList(songs: List<Song>) {
                         onClick = {
                             if (isPlaying) {
                                 mediaPlayer?.pause()
-                                playingIdx = null
+                                onPlayingIdxChange(null)
                             } else {
                                 mediaPlayer?.release()
-                                mediaPlayer = MediaPlayer.create(ctx, song.audioRes).apply {
-                                    setOnCompletionListener { playingIdx = null }
+                                val newMediaPlayer = MediaPlayer.create(ctx, song.audioRes).apply {
+                                    setOnCompletionListener { onPlayingIdxChange(null) }
                                     start()
                                 }
-                                playingIdx = index
+                                onMediaPlayerChange(newMediaPlayer)
+                                onPlayingIdxChange(index)
                             }
                         },
                         modifier = Modifier.align(Alignment.End)
@@ -297,6 +337,81 @@ fun SongList(songs: List<Song>) {
                             contentDescription = null
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MiniPlayer(
+    currentSong: Song,
+    isPlaying: Boolean,
+    context: Context,
+    onPlayPauseClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onPreviousClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp), // Match SearchBar height
+        color = Color(0xFFF5F5F5).copy(alpha = 0.8f), // Translucent background
+        shape = MaterialTheme.shapes.small,
+        tonalElevation = 4.dp // Add subtle shadow
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Song Image
+            Image(
+                painter = painterResource(currentSong.imageRes),
+                contentDescription = currentSong.title,
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.Gray, MaterialTheme.shapes.small),
+                contentScale = ContentScale.Crop
+            )
+
+            // Song Title
+            Text(
+                text = currentSong.title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF212121),
+                maxLines = 1,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+            )
+
+            // Control Buttons
+            Row {
+                IconButton(onClick = onPreviousClick) {
+                    Icon(
+                        imageVector = Icons.Default.SkipPrevious,
+                        contentDescription = "Previous",
+                        tint = Color(0xFF6200EE)
+                    )
+                }
+                IconButton(onClick = onPlayPauseClick) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = Color(0xFF6200EE)
+                    )
+                }
+                IconButton(onClick = onNextClick) {
+                    Icon(
+                        imageVector = Icons.Default.SkipNext,
+                        contentDescription = "Next",
+                        tint = Color(0xFF6200EE)
+                    )
                 }
             }
         }
